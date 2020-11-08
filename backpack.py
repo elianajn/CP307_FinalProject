@@ -28,7 +28,7 @@ class Solver():
         self.method = method
 
     def solve(self, problem):
-        if self.method == "BRUTE":
+        if self.method == "BRUTE_FORCE":
             return self.brute_force(problem)
         elif self.method == "BETTER_WAY":
             return self.better_way(problem)
