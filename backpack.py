@@ -204,7 +204,8 @@ def format_results(result):
 
 def main():
     # results = solveKnapsackFile("toy_problems.txt")
-    results = solveKnapsackFile("problems_size20.txt")
+    # results = solveKnapsackFile("problems_size20.txt")
+    results = solveKnapsackFile("problems_size50.txt")
     for idx, result in enumerate(results):
         print("---------------------------")
         print("Problem: {}".format(idx))
