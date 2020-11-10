@@ -37,7 +37,7 @@ class Solver():
         elif self.method == "BRANCH_AND_BOUND":
             return self.branchandbound(problem)
         elif self.method == "DYNAMIC":
-            return self.branchandbound(problem)
+            return self.dynamic(problem)
 
     def brute_force(self, problem):
         out = self.sub_lists(list(problem.items.keys()))
@@ -88,17 +88,28 @@ class Solver():
         return scoredItems
 
     def dynamic(self, problem):
-        matrix = []
-        # TODO sort the items based on weight; increasing
+        # matrix = []
+        width = int(problem.threshold) + 1
+        height = len(problem.items)
+        print("WIDTH ", width)
+        print(height)
+        matrix = np.zeros((height, width))
+        # sortedItems is a list of tuples (weight,item)
         sortedItems = self.sortItems(problem)
         # number of columns is the total weight
         # number of rows is the number of items
-        for row in len(problem.items):
-            for col in problem.threshold:
-                item = sortItems[row]
-                value = int(item[0])
-                weight = int(item[1])
+        for row in range(len(problem.items)):
+            for col in range(width):
+                item, (valueS, weightS) = sortedItems[row]
+                # print(item)
+                # value = int(item[0])
+                value = int(valueS)
+                # weight = int(item[1])
+                weight = int(weightS)
+                # matrix.append([])
+                # print(matrix)
                 if row == 0:
+                    # print("weight at 0: ", weight)
                     if weight <= col:
                         matrix[row][col] = value
                     else:
@@ -109,23 +120,55 @@ class Solver():
                     else:
                         score_above = matrix[row-1][col]
                         best_possible_score = value + matrix[row-1][col-weight]
-                        matrix[row][col] = np.max(score_above, best_possible_score)
+                        matrix[row][col] = np.max([score_above, best_possible_score])
         # now we gotta select the items that actually got used
         # start at bottom right
+        print(matrix)
         c = problem.threshold
         selected_items = []
-        for r in range(problem.items, 0):
+        for r in range(height-1, -1, -1):
             if r != 0 and matrix[r][c] == matrix[r-1][c]:
-                c -= 1 # if it is the same as what is directly above it the item in that row wasn't included
-            elif r != 0 and matrix[r][c] != matrix[r-1][c]:
-                selected_items.append(None) # TODO. append the item at the correct index. requires a sorted list of items
-            elif r == 0 and matrix[0][c] != 0:
-                selected_items.append(None) # TODO. append the item at the correct index. requires a sorted list of items
+                continue
+            if r != 0 and matrix[r][c] != matrix[r-1][c]:
+                item = sortedItems[r]
+                selected_items.append(item)
+                weight = item[1][1]
+                print("WEIGHT ", weight)
+                c -= int(weight)
+                print("NEW C ", weight)
+                if c < 0:
+                    print("breaking")
+                    break
+            elif r == 0:
+                item = sortedItems[r]
+                weight = int(item[1][1])
+                print("weight of last item: ", weight)
+                print("space left: ", c)
+                if weight <= c:
+                    selected_items.append(item)
         return selected_items
 
 
     def sortItems(self, problem):
-        return "to-do"
+        output = []
+        c = 0
+        ls = (problem.items)
+        # weight = 0
+        for item in problem.items:
+            weight = int(item[1][1])
+            output.append([])
+            # output.append((weight, item))
+            output[c].append(weight)
+            output[c].append(item)
+            c += 1
+        output.sort(key=lambda x:x[0])
+        # for i in output:
+        #     print(i)
+        # arr = np.array(output, dtype=object)
+        # print(flatten(arr[1:,1:]))
+        print(list(map(lambda x:x[1], output)))
+        return(list(map(lambda x:x[1], output)))
+        # return arr[:1,:]
 
 
 def preprocess(file_name):
@@ -158,7 +201,7 @@ def preprocess(file_name):
 def solveKnapsackFile(file_name):
     problems = preprocess(file_name)
     # solver = Solver("BRUTE_FORCE")
-    solver = Solver("BRANCH_AND_BOUND")
+    solver = Solver("DYNAMIC")
     # solver = Solver("BETTER_WAY")
     ret = []
     for problem in problems:
@@ -167,13 +210,20 @@ def solveKnapsackFile(file_name):
         ret.append(output)
     return ret
 
+def format_results(result):
+    output = (list(map(lambda x:x[0], result)))
+    output.sort(key=lambda x:x[0])
+    return output
+    # print(out)
+
 def main():
     results = solveKnapsackFile("toy_problems.txt")
     # results = solveKnapsackFile("problems_size20.txt")
     for idx, result in enumerate(results):
         print("---------------------------")
         print("Problem: {}".format(idx))
-        print("Best Solution: {}".format(result))
+        print("Best Solution: {}".format(format_results(result)))
+        # format_results(result)
         print("---------------------------")
         print(" ")
 
