@@ -1,0 +1,19 @@
+2
+Problem0
+50
+Hat         7         5
+Sunscreen   3         3
+Tent        13        16
+Food        10        20
+Water       15        22
+Book        2         4
+Rock        1         28
+Camera      5         11
+Bandage     7         3
+Problem1
+10
+ToyCar      2         1
+Juice       3         5
+Popsicle    5         3
+Blanket     7         5
+Candy       10        4

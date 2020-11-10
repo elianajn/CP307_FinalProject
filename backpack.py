@@ -97,8 +97,8 @@ def solveKnapsackFile(file_name):
     return ret
 
 def main():
-    # results = solveKnapsackFile("toy_problems.txt")
-    results = solveKnapsackFile("problems_size20.txt")
+    results = solveKnapsackFile("toy_problems.txt")
+    # results = solveKnapsackFile("problems_size20.txt")
     for idx, result in enumerate(results):
         print("---------------------------")
         print("Problem: {}".format(idx))
