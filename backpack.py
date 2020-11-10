@@ -7,6 +7,7 @@ Created on Fri Nov  6 18:05:26 2020
 """
 import pandas as pd
 import re
+import heapq
 
 class Problem():
 
@@ -32,6 +33,8 @@ class Solver():
             return self.brute_force(problem)
         elif self.method == "BETTER_WAY":
             return self.better_way(problem)
+        elif self.method == "BRANCH_AND_BOUND":
+            return self.branchandbound(problem)
 
     def brute_force(self, problem):
         out = self.sub_lists(list(problem.items.keys()))
@@ -62,6 +65,25 @@ class Solver():
             lists = orig + lists
         return lists
 
+    def branchandbound(self, problem):
+        scoredItems = self.scoreItems(problem)
+        heap = []
+        # for item in scoredItems:
+        #     heapq.heappush(li,4)
+        return []
+
+    # scores items value - weight
+    # returns list of tuples (item name, score)
+    def scoreItems(self, problem):
+        scoredItems = []
+        for item in problem.items:
+            valueStr, weightStr = item[1]
+            value = int(valueStr)
+            weight = int(weightStr)
+            score = value - weight
+            scoredItems.append((item[0], -score)) # returning as inverted bc there is only minheap
+        return scoredItems
+
 def preprocess(file_name):
     # partition the dataset and return a list of problems
     file = pd.read_csv(file_name, header=None, encoding='utf-8')
@@ -72,13 +94,17 @@ def preprocess(file_name):
         if line[0].isdigit():
             problem_num = str(data[idx-1][0])
             threshold = int(line[0])
-            items = {}
+            # items = {}
+            items = []
             i = idx+1
             while len(data) > i and data[i][0].isdigit() == False:
                 # chunks = re.split(' +', data[i][0])
-                chunks = data[i][0].split('\t', 2)
+                # chunks = data[i][0].split('\t', 2)
+                chunks = data[i][0].split()
                 if len(chunks) == 3:
-                    items[chunks[0]] = (int(chunks[1]), int(chunks[2]))
+                    # @ andrewpinkham why did you do it like this. why not a 2d array w item and (value, weight)
+                    # items[chunks[0]] = (int(chunks[1]), int(chunks[2]))
+                    items.append([chunks[0], (chunks[1], chunks[2])])
                 i+=1
             problem = Problem(_problem_num=problem_num, _threshold=threshold, _items=items)
             ret.append(problem)
@@ -87,7 +113,8 @@ def preprocess(file_name):
 
 def solveKnapsackFile(file_name):
     problems = preprocess(file_name)
-    solver = Solver("BRUTE_FORCE")
+    # solver = Solver("BRUTE_FORCE")
+    solver = Solver("BRANCH_AND_BOUND")
     # solver = Solver("BETTER_WAY")
     ret = []
     for problem in problems:
