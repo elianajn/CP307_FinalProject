@@ -8,6 +8,7 @@ Created on Fri Nov  6 18:05:26 2020
 import pandas as pd
 import re
 import heapq
+import numpy as np
 
 class Problem():
 
@@ -34,6 +35,8 @@ class Solver():
         elif self.method == "BETTER_WAY":
             return self.better_way(problem)
         elif self.method == "BRANCH_AND_BOUND":
+            return self.branchandbound(problem)
+        elif self.method == "DYNAMIC":
             return self.branchandbound(problem)
 
     def brute_force(self, problem):
@@ -83,6 +86,47 @@ class Solver():
             score = value - weight
             scoredItems.append((item[0], -score)) # returning as inverted bc there is only minheap
         return scoredItems
+
+    def dynamic(self, problem):
+        matrix = []
+        # TODO sort the items based on weight; increasing
+        sortedItems = self.sortItems(problem)
+        # number of columns is the total weight
+        # number of rows is the number of items
+        for row in len(problem.items):
+            for col in problem.threshold:
+                item = sortItems[row]
+                value = int(item[0])
+                weight = int(item[1])
+                if row == 0:
+                    if weight <= col:
+                        matrix[row][col] = value
+                    else:
+                        matrix[row][col] = 0
+                else:
+                    if weight > col:
+                        matrix[row][col] = matrix[row-1][col]
+                    else:
+                        score_above = matrix[row-1][col]
+                        best_possible_score = value + matrix[row-1][col-weight]
+                        matrix[row][col] = np.max(score_above, best_possible_score)
+        # now we gotta select the items that actually got used
+        # start at bottom right
+        c = problem.threshold
+        selected_items = []
+        for r in range(problem.items, 0):
+            if r != 0 and matrix[r][c] == matrix[r-1][c]:
+                c -= 1 # if it is the same as what is directly above it the item in that row wasn't included
+            elif r != 0 and matrix[r][c] != matrix[r-1][c]:
+                selected_items.append(None) # TODO. append the item at the correct index. requires a sorted list of items
+            elif r == 0 and matrix[0][c] != 0:
+                selected_items.append(None) # TODO. append the item at the correct index. requires a sorted list of items
+        return selected_items
+
+
+    def sortItems(self, problem):
+        return "to-do"
+
 
 def preprocess(file_name):
     # partition the dataset and return a list of problems
