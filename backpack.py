@@ -91,8 +91,6 @@ class Solver():
         # matrix = []
         width = int(problem.threshold) + 1
         height = len(problem.items)
-        print("WIDTH ", width)
-        print(height)
         matrix = np.zeros((height, width))
         # sortedItems is a list of tuples (weight,item)
         sortedItems = self.sortItems(problem)
@@ -123,7 +121,6 @@ class Solver():
                         matrix[row][col] = np.max([score_above, best_possible_score])
         # now we gotta select the items that actually got used
         # start at bottom right
-        print(matrix)
         c = problem.threshold
         selected_items = []
         for r in range(height-1, -1, -1):
@@ -133,17 +130,12 @@ class Solver():
                 item = sortedItems[r]
                 selected_items.append(item)
                 weight = item[1][1]
-                print("WEIGHT ", weight)
                 c -= int(weight)
-                print("NEW C ", weight)
                 if c < 0:
-                    print("breaking")
                     break
             elif r == 0:
                 item = sortedItems[r]
                 weight = int(item[1][1])
-                print("weight of last item: ", weight)
-                print("space left: ", c)
                 if weight <= c:
                     selected_items.append(item)
         return selected_items
@@ -162,13 +154,7 @@ class Solver():
             output[c].append(item)
             c += 1
         output.sort(key=lambda x:x[0])
-        # for i in output:
-        #     print(i)
-        # arr = np.array(output, dtype=object)
-        # print(flatten(arr[1:,1:]))
-        print(list(map(lambda x:x[1], output)))
         return(list(map(lambda x:x[1], output)))
-        # return arr[:1,:]
 
 
 def preprocess(file_name):
@@ -217,8 +203,8 @@ def format_results(result):
     # print(out)
 
 def main():
-    results = solveKnapsackFile("toy_problems.txt")
-    # results = solveKnapsackFile("problems_size20.txt")
+    # results = solveKnapsackFile("toy_problems.txt")
+    results = solveKnapsackFile("problems_size20.txt")
     for idx, result in enumerate(results):
         print("---------------------------")
         print("Problem: {}".format(idx))
