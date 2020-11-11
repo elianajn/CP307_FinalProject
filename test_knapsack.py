@@ -9,6 +9,8 @@ import pandas as pd
 import re
 import heapq
 import numpy as np
+from HashTable import HashTable
+from LinkedList import LinkedList
 
 class Problem():
 
@@ -88,26 +90,19 @@ class Solver():
         return scoredItems
 
     def dynamic(self, problem):
-        # matrix = []
         width = int(problem.threshold) + 1
-        height = len(problem.items)
+        height = problem.items.size()
         matrix = np.zeros((height, width))
         # sortedItems is a list of tuples (weight,item)
         sortedItems = self.sortItems(problem)
         # number of columns is the total weight
         # number of rows is the number of items
-        for row in range(len(problem.items)):
+        for row in range(problem.items.size()):
             for col in range(width):
-                item, (valueS, weightS) = sortedItems[row]
-                # print(item)
-                # value = int(item[0])
+                (valueS, weightS) = problem.items.get(sortedItems[row])
                 value = int(valueS)
-                # weight = int(item[1])
                 weight = int(weightS)
-                # matrix.append([])
-                # print(matrix)
                 if row == 0:
-                    # print("weight at 0: ", weight)
                     if weight <= col:
                         matrix[row][col] = value
                     else:
@@ -129,13 +124,14 @@ class Solver():
             if r != 0 and matrix[r][c] != matrix[r-1][c]:
                 item = sortedItems[r]
                 selected_items.append(item)
-                weight = item[1][1]
+                value, weight = problem.items.get(item)
                 c -= int(weight)
                 if c < 0:
                     break
             elif r == 0:
                 item = sortedItems[r]
-                weight = int(item[1][1])
+                value, weight = problem.items.get(item)
+                weight = int(weight)
                 if weight <= c:
                     selected_items.append(item)
         return selected_items
@@ -144,17 +140,32 @@ class Solver():
     def sortItems(self, problem):
         output = []
         c = 0
-        ls = (problem.items)
+        # ls = (problem.items)
         # weight = 0
-        for item in problem.items:
-            weight = int(item[1][1])
+        keys = problem.items.getKeys()
+        for key in keys:
+            valueS, weightS = problem.items.get(key)
+            value = int(valueS)
+            weight = int(weightS)
             output.append([])
-            # output.append((weight, item))
             output[c].append(weight)
-            output[c].append(item)
+            output[c].append(key)
             c += 1
         output.sort(key=lambda x:x[0])
+        # print(output)
+        for idx,item in enumerate(output):
+            if item == output[0]:
+                continue
+            if item[0] == output[idx-1]:
+                value_item = problem.items.get(item[1])
+                value_backone = problem.items.get(output[idx-1][1])
+                if value_item < value_backone:
+                    # ls[x], ls[y] = ls[y], ls[x]
+                    output[idx], output[idx-1] = output[idx-1], output[idx]
+
         return(list(map(lambda x:x[1], output)))
+        # return output
+        # return(list(map(lambda x:x[1], output)))
 
 
 def preprocess(file_name):
@@ -167,17 +178,18 @@ def preprocess(file_name):
         if line[0].isdigit():
             problem_num = str(data[idx-1][0])
             threshold = int(line[0])
-            # items = {}
-            items = []
+            items = HashTable()
+            # items = []
             i = idx+1
             while len(data) > i and data[i][0].isdigit() == False:
                 # chunks = re.split(' +', data[i][0])
-                # chunks = data[i][0].split('\t', 2)
-                chunks = data[i][0].split()
+                chunks = data[i][0].split('\t', 2)
+                # chunks = data[i][0].split()
                 if len(chunks) == 3:
                     # @ andrewpinkham why did you do it like this. why not a 2d array w item and (value, weight)
                     # items[chunks[0]] = (int(chunks[1]), int(chunks[2]))
-                    items.append([chunks[0], (chunks[1], chunks[2])])
+                    items.put(chunks[0], (int(chunks[1]), int(chunks[2])))
+                    # items.append([chunks[0], (chunks[1], chunks[2])])
                 i+=1
             problem = Problem(_problem_num=problem_num, _threshold=threshold, _items=items)
             ret.append(problem)
@@ -197,15 +209,16 @@ def solveKnapsackFile(file_name):
     return ret
 
 def format_results(result):
-    output = (list(map(lambda x:x[0], result)))
-    output.sort(key=lambda x:x[0])
-    return output
+    # output = (list(map(lambda x:x[0], result)))
+    result.sort(key=lambda x:x)
+    return result
     # print(out)
 
 def main():
     # results = solveKnapsackFile("toy_problems.txt")
     # results = solveKnapsackFile("problems_size20.txt")
-    results = solveKnapsackFile("problems_size50.txt")
+    results = solveKnapsackFile("problems_size100.txt")
+    # results = solveKnapsackFile("problems_size1000.txt")
     for idx, result in enumerate(results):
         print("---------------------------")
         print("Problem: {}".format(idx))

@@ -5,12 +5,14 @@ class HashTable:
         self.current_size = 0
         self.data = [None] * size # we want this to be statically sized
         self.array_size = size
+        self.keys = []
 
     def size(self):
         return self.current_size
 
     def hashFunction(self, key):
         # assume key is an integer
+        key = int.from_bytes(key.encode('utf-8'), 'little')
         return key % self.array_size
 
     def put(self, key, value):
@@ -18,6 +20,7 @@ class HashTable:
         if self.data[index] == None:
             self.data[index] = LinkedList()
         self.data[index].add((key,value))
+        self.keys.append(key)
         self.current_size += 1
 
     def get(self, target_key):
@@ -33,6 +36,9 @@ class HashTable:
         # print(self.hasKey(target_key))
         value = ll[list_index][1] # what if it's not there?
         return value
+
+    def getKeys(self):
+        return self.keys
 
     def delete(self, target_key):
         index = self.hashFunction(target_key)
@@ -61,24 +67,3 @@ class HashTable:
         if list_index == ll.size()-1 and ll[list_index][0] != target_key:
             return False
         return True
-
-
-def main():
-    ht = HashTable()
-    ht.put(23, "ella")
-    ht.put(70, "mars")
-    ht.put(6, "nocturnal")
-    ht.put(1, "moo")
-    ht.put(21, "medee")
-    ht.put(41, "golden")
-    print(ht.get(23))
-    print(ht.get(6))
-    print(ht.get(1))
-    print(ht.get(21))
-    print(ht.hasKey(6))
-    ht.delete(6)
-    print(ht.hasKey(6))
-
-
-if __name__ == "__main__":
-    main()
