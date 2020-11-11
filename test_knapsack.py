@@ -3,7 +3,9 @@
 """
 Created on Fri Nov  6 18:05:26 2020
 
+@author: elianajn
 @author: andrewpinkham
+@author: will-pasley
 """
 import pandas as pd
 import re
@@ -34,10 +36,6 @@ class Solver():
     def solve(self, problem):
         if self.method == "BRUTE_FORCE":
             return self.brute_force(problem)
-        elif self.method == "BETTER_WAY":
-            return self.better_way(problem)
-        elif self.method == "BRANCH_AND_BOUND":
-            return self.branchandbound(problem)
         elif self.method == "DYNAMIC":
             return self.dynamic(problem)
 
@@ -54,40 +52,6 @@ class Solver():
                 valid.append((l, value_total))
         valid.sort(key=lambda x:x[1])
         return valid[-1]
-
-    def better_way(self, problem):
-        #our better way!
-        return "to-do"
-
-    def sub_lists(self, l):
-        base = []
-        lists = [base]
-        for i in range(len(l)):
-            orig = lists[:]
-            new = l[i]
-            for j in range(len(lists)):
-                lists[j] = lists[j] + [new]
-            lists = orig + lists
-        return lists
-
-    def branchandbound(self, problem):
-        scoredItems = self.scoreItems(problem)
-        heap = []
-        # for item in scoredItems:
-        #     heapq.heappush(li,4)
-        return []
-
-    # scores items value - weight
-    # returns list of tuples (item name, score)
-    def scoreItems(self, problem):
-        scoredItems = []
-        for item in problem.items:
-            valueStr, weightStr = item[1]
-            value = int(valueStr)
-            weight = int(weightStr)
-            score = value - weight
-            scoredItems.append((item[0], -score)) # returning as inverted bc there is only minheap
-        return scoredItems
 
     def dynamic(self, problem):
         width = int(problem.threshold) + 1
@@ -119,8 +83,10 @@ class Solver():
         c = problem.threshold
         selected_items = []
         for r in range(height-1, -1, -1):
+            # if the value is the same as the value above it that means that row item was not used
             if r != 0 and matrix[r][c] == matrix[r-1][c]:
                 continue
+            # if the one directly above is different decrement the column by the weight of the item being counted
             if r != 0 and matrix[r][c] != matrix[r-1][c]:
                 item = sortedItems[r]
                 selected_items.append(item)
@@ -128,6 +94,7 @@ class Solver():
                 c -= int(weight)
                 if c < 0:
                     break
+            # if the row is 0 you can't look above. just consider the remaining weight
             elif r == 0:
                 item = sortedItems[r]
                 value, weight = problem.items.get(item)
@@ -137,11 +104,10 @@ class Solver():
         return selected_items
 
 
+    # sorts the list of items by decreasing weight
     def sortItems(self, problem):
         output = []
         c = 0
-        # ls = (problem.items)
-        # weight = 0
         keys = problem.items.getKeys()
         for key in keys:
             valueS, weightS = problem.items.get(key)
@@ -152,7 +118,9 @@ class Solver():
             output[c].append(key)
             c += 1
         output.sort(key=lambda x:x[0])
-        # print(output)
+
+        # since this is a bottom up method if there are multiple items with the same weight
+        # we need to manually sort them so that the item with the larger value is later in the list
         for idx,item in enumerate(output):
             if item == output[0]:
                 continue
@@ -160,12 +128,8 @@ class Solver():
                 value_item = problem.items.get(item[1])
                 value_backone = problem.items.get(output[idx-1][1])
                 if value_item < value_backone:
-                    # ls[x], ls[y] = ls[y], ls[x]
                     output[idx], output[idx-1] = output[idx-1], output[idx]
-
         return(list(map(lambda x:x[1], output)))
-        # return output
-        # return(list(map(lambda x:x[1], output)))
 
 
 def preprocess(file_name):
